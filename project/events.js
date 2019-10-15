@@ -454,12 +454,8 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 									},
 									{
 										"type": "if",
-										"condition": "core.hasSelfMonster(flag:x, flag:y)",
+										"condition": "core.isBlocked(flag:x, flag:y)",
 										"true": [
-											{
-												"type": "comment",
-												"text": "该点存在其他自身怪物，忽略"
-											},
 											{
 												"type": "tip",
 												"text": "不合法的移动"

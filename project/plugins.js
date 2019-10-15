@@ -116,10 +116,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	this.isBlocked = function (x, y) {
 		var blockId = core.getBlockId(x, y);
-		return blockId && blockId == 'star';
-	}
+		if (blockId && blockId == 'star') return true;
 
-	this.hasSelfMonster = function (x, y) {
 		var values = this.players[flags.turn];
 		for (var i in values) {
 			if (values[i].loc[0] == x && values[i].loc[1] == y)
@@ -134,7 +132,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				if (this.isValidStep(x, y)) {
 					var color = 'rgba(0, 255, 0, 0.7)';
 					if (this.isSelf(x, y)) color = 'rgba(255, 165, 0, 0.7)';
-					else if (this.hasSelfMonster(x, y)) color = 'rgba(255, 0, 0, 0.7)';
+					else if (this.isBlocked(x, y)) color = 'rgba(255, 0, 0, 0.7)';
 					core.fillRect('color', 32 * x, 32 * y, 32, 32, color);
 				}
 			}
