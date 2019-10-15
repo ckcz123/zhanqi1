@@ -10,7 +10,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 				"type": "choices",
 				"choices": [
 					{
-						"text": "攻击+${1*flag:arg1}",
+						"text": "攻击+${flag:arg1}",
 						"action": [
 							{
 								"type": "function",
@@ -19,7 +19,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						]
 					},
 					{
-						"text": "防御+${1*flag:arg1}",
+						"text": "防御+${flag:arg1}",
 						"action": [
 							{
 								"type": "function",
@@ -28,11 +28,11 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						]
 					},
 					{
-						"text": "生命+${50*flag:arg1}",
+						"text": "生命+${20*flag:arg1}",
 						"action": [
 							{
 								"type": "function",
-								"function": "function(){\nflags.obj.hp += 50 * flags.arg1\n}"
+								"function": "function(){\nflags.obj.hp += 20 * flags.arg1\n}"
 							}
 						]
 					}
@@ -432,61 +432,47 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 							},
 							{
 								"type": "if",
-								"condition": "core.isValidStep(flag:x, flag:y)",
+								"condition": "core.isSelf(flag:x, flag:y)",
 								"true": [
 									{
-										"type": "if",
-										"condition": "core.isSelf(flag:x, flag:y)",
-										"true": [
-											{
-												"type": "comment",
-												"text": "再次选择自身：取消选择"
-											},
-											{
-												"type": "setValue",
-												"name": "flag:choose",
-												"value": "null"
-											},
-											{
-												"type": "continue"
-											}
-										]
-									},
-									{
-										"type": "if",
-										"condition": "core.isBlocked(flag:x, flag:y)",
-										"true": [
-											{
-												"type": "tip",
-												"text": "不合法的移动"
-											},
-											{
-												"type": "continue"
-											}
-										]
-									},
-									{
 										"type": "comment",
-										"text": "跳跃动画，战斗，改变坐标"
+										"text": "再次选择自身：取消选择"
 									},
 									{
-										"type": "jump",
-										"from": [
-											"flags.obj.loc[0]",
-											"flags.obj.loc[1]"
-										],
-										"to": [
-											"flag:x",
-											"flag:y"
-										],
-										"time": 300,
-										"keep": true
+										"type": "setValue",
+										"name": "flag:choose",
+										"value": "null"
 									},
 									{
-										"type": "function",
-										"function": "function(){\ncore.moveTo(flags.x,flags.y)\n}"
+										"type": "continue"
 									}
 								]
+							},
+							{
+								"type": "if",
+								"condition": "flag:choose[0] != flag:turn || core.hasSelfMonster(flag:x, flag:y)",
+								"true": [
+									{
+										"type": "comment",
+										"text": "选中的是对方怪物，或选中己方其他怪物"
+									},
+									{
+										"type": "setValue",
+										"name": "flag:choose",
+										"value": "core.getMonster(flag:x, flag:y)"
+									},
+									{
+										"type": "continue"
+									}
+								]
+							},
+							{
+								"type": "comment",
+								"text": "行走动画，战斗，改变坐标"
+							},
+							{
+								"type": "function",
+								"function": "function(){\ncore.moveTo(flags.x,flags.y)\n}"
 							},
 							{
 								"type": "continue"

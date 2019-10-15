@@ -1,47 +1,32 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
     "init": function () {
-	var dis = function (x1, x2) { return Math.abs(x1 - x2); }
-
 	this.monsters = [{
-			hp: 100,
-			atk: 10,
-			def: 5,
-			point: 1,
-			rule: function (x0, y0, x, y) {
-				var disx = dis(x, x0),
-					disy = dis(y, y0);
-				return (disx <= 1 && disy <= 1) || (disx == 2 && disy == 0) || (disx == 0 && disy == 2);
-			},
+			hp: 150,
+			atk: 14,
+			def: 4,
+			dis: 2,
+			level: 1
 		},
 		{
-			hp: 120,
-			atk: 12,
+			hp: 175,
+			atk: 18,
 			def: 3,
-			point: 2,
-			rule: function (x0, y0, x, y) {
-				var disx = dis(x, x0),
-					disy = dis(y, y0);
-				return (disx <= 1 && disy <= 1) || (disx == 2 && disy == 1) || (disx == 1 && disy == 2);
-			},
+			dis: 3,
+			level: 2,
 		},
 		{
-			hp: 100,
-			atk: 15,
-			def: 8,
-			point: 3,
-			rule: function (x0, y0, x, y) {
-				return dis(x, x0) <= 2 && dis(y, y0) <= 2;
-			},
+			hp: 200,
+			atk: 22,
+			def: 5,
+			dis: 4,
+			level: 3
 		},
 		{
 			hp: 1,
 			atk: 641,
 			def: 0,
-			point: 0,
-			rule: function (x0, y0, x, y) {
-				return dis(x, x0) <= 1 && dis(y, y0) <= 1;
-			},
+			dis: 1,
 			boss: true
 		}
 	];
@@ -53,16 +38,44 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	]
 	this.playerMonsters = [];
 	this.playerMonsters[0] = [ // 我方
-		[[6, 9],[5, 10],[7, 10],[4, 11],[8, 11]],
-		[[6, 10],[5, 11],[7, 11]],
-		[[6, 11]],
-		[[6,12]]
+		[
+			[6, 9],
+			[5, 10],
+			[7, 10],
+			[4, 11],
+			[8, 11]
+		],
+		[
+			[6, 10],
+			[5, 11],
+			[7, 11]
+		],
+		[
+			[6, 11]
+		],
+		[
+			[6, 12]
+		]
 	];
 	this.playerMonsters[1] = [ // 对方
-		[[6, 3],[5, 2],[7, 2],[4, 1],[8, 1]],
-		[[6, 2],[5, 1],[7, 1]],
-		[[6, 1]],
-		[[6,0]]
+		[
+			[6, 3],
+			[5, 2],
+			[7, 2],
+			[4, 1],
+			[8, 1]
+		],
+		[
+			[6, 2],
+			[5, 1],
+			[7, 1]
+		],
+		[
+			[6, 1]
+		],
+		[
+			[6, 0]
+		]
 	];
 	this.players = [
 		[],
@@ -94,16 +107,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	this.getMonster = function (x, y) {
 		if (!this.isInGame()) return null;
-		for (var j = 0; j < this.players[flags.turn].length; j++) {
-			if (this.players[flags.turn][j].loc[0] == x && this.players[flags.turn][j].loc[1] == y) {
-				return j;
+		for (var i = 0; i < this.players.length; i++) {
+			for (var j = 0; j < this.players[flags.turn].length; j++) {
+				if (this.players[i][j].loc[0] == x && this.players[i][j].loc[1] == y) {
+					return [i, j];
+				}
 			}
 		}
 		return null;
 	}
 
 	this.getMonsterObj = function () {
-		flags.obj = this.players[flags.turn][flags.choose];
+		if (flags.choose == null) flags.obj = null;
+		else flags.obj = this.players[flags.choose[0]][flags.choose[1]];
 	}
 
 	this.isValidStep = function (x, y) {
@@ -114,11 +130,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return flags.obj && flags.obj.loc[0] == x && flags.obj.loc[1] == y;
 	}
 
-	this.isBlocked = function (x, y) {
-		var blockId = core.getBlockId(x, y);
-		if (blockId && blockId == 'star') return true;
-
-		var values = this.players[flags.turn];
+	this.hasSelfMonster = function (x, y) {
+		var values = this.players[flags.choose[0]];
 		for (var i in values) {
 			if (values[i].loc[0] == x && values[i].loc[1] == y)
 				return true;
@@ -126,23 +139,68 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return false;
 	}
 
+	this.getMovablePoints = function () {
+		var x = flags.obj.loc[0],
+			y = flags.obj.loc[1],
+			d = flags.obj.dis;
+		var queue = [{ x: x, y: y, d: d }],
+			route = {};
+		route[x + "," + y] = [];
+		while (queue.length > 0) {
+			var l = queue.shift(),
+				x = l.x,
+				y = l.y,
+				d = l.d;
+			var r = route[x + "," + y];
+			if (d <= 0) continue;
+			for (var direction in core.utils.scan) {
+				var nx = x + core.utils.scan[direction].x;
+				var ny = y + core.utils.scan[direction].y;
+				if (nx < 0 || nx > 12 || ny < 0 || ny > 12) continue;
+				if (route[nx + "," + ny] != null) continue;
+				if (core.getBlockId(nx, ny) == 'star') continue;
+				if (this.hasSelfMonster(nx, ny)) continue;
+				route[nx + "," + ny] = r.concat(direction);
+				if (core.noPass(nx, ny)) continue;
+				queue.push({ x: nx, y: ny, d: d - 1 });
+			}
+		}
+		return route;
+	}
+
 	this.drawValidGrids = function () {
-		for (var x = 0; x < 13; ++x) {
-			for (var y = 0; y < 13; ++y) {
-				if (this.isValidStep(x, y)) {
-					var color = 'rgba(0, 255, 0, 0.7)';
-					if (this.isSelf(x, y)) color = 'rgba(255, 165, 0, 0.7)';
-					else if (this.isBlocked(x, y)) color = 'rgba(255, 0, 0, 0.7)';
-					core.fillRect('color', 32 * x, 32 * y, 32, 32, color);
-				}
+		if (!this.hasObj()) return;
+		var obj = flags.obj;
+
+		core.fillRect('color', 32 * obj.loc[0], 32 * obj.loc[1], 32, 32, 'rgba(255, 0, 0, 0.7)');
+		var points = this.getMovablePoints();
+		for (var point in points) {
+			var s = point.split(","),
+				x = parseInt(s[0]),
+				y = parseInt(s[1]);
+			if (x != obj.loc[0] || y != obj.loc[1]) {
+				core.fillRect('color', 32 * x, 32 * y, 32, 32, 'rgba(0, 255, 0, 0.7)');
 			}
 		}
 	}
 
 	this.moveTo = function (x, y) {
-		// 跳跃并战斗，已保证合法性
-		if (!this.hasObj()) return;
+		// 行走并战斗
+		if (!this.hasObj() || flags.choose[0] != flags.turn) return;
+		var routes = this.getMovablePoints();
+		var route = routes[x + "," + y];
+		if (route == null) return;
 
+		// 行走动画
+		this.isMoving = true;
+		core.insertAction([
+			{ "type": "move", "loc": [flags.obj.loc[0], flags.obj.loc[1]], "time": 250, "steps": route, "keep": true },
+			{ "type": "function", "function": "function() { core.afterMove(flags.x, flags.y); }" }
+		]);
+	}
+
+	this.afterMove = function (x, y) {
+		delete this.isMoving;
 		flags.ox = flags.obj.loc[0];
 		flags.oy = flags.obj.loc[1];
 
@@ -166,14 +224,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				flags.obj.loc[0] = x;
 				flags.obj.loc[1] = y;
 				flags.obj.hp -= damage[1];
+
+				var point = 4;
+				if (flags.obj.level > one.level) point /= 2;
+				else if (flags.obj.level < one.level) point *= 2;
+
 				if (!one.boss) {
 					// 加点
 					core.insertAction([
-						{ "type": "insert", "name": "加点事件", "args": [one.point] },
+						{ "type": "insert", "name": "加点事件", "args": [point] },
 						{ "type": "function", "function": "function () { core.put(); }" },
 						{ "type": "setValue", "name": "flag:choose", "value": "null" },
 						{ "type": "setValue", "name": "flag:turn", "value": "1-flag:turn" },
-						{ "type": "function", "function": "function() { core.drawTurnTip(); }"}
+						{ "type": "function", "function": "function() { core.drawTurnTip(); }" }
 					]);
 					return;
 				}
@@ -188,6 +251,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		flags.turn = 1 - flags.turn;
 		core.updateStatusBar();
 		this.drawTurnTip();
+
 	}
 
 	this.drawTurnTip = function () {
@@ -195,7 +259,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (win == -1) {
 			core.drawTip(flags.turn == 0 ? "己方回合" : "对方回合");
 		} else {
-			core.insertAction({"type": "insert", "name": "获胜与失败", "args": [win]});
+			core.insertAction({ "type": "insert", "name": "获胜与失败", "args": [win] });
 		}
 	}
 
@@ -229,27 +293,29 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	core.control.clearStatusBar = function () {}
 
 	core.control.updateStatusBar = function () {
+		core.clearMap('damage');
+		core.clearMap('color');
 		if (core.isInGame()) core.getMonsterObj();
 		var obj = core.getFlag('obj');
-		core.clearMap('color');
 		if (obj == null) {
 			core.setStatusBarInnerHTML('hp', '---');
 			core.setStatusBarInnerHTML('atk', '---');
 			core.setStatusBarInnerHTML('def', '---');
-			core.clearMap('damage');
-			if (core.isInGame()) {
-				var values = core.plugin.players[flags.turn];
-				for (var i in values) {
-					core.fillRect('color', 32 * values[i].loc[0], 32 * values[i].loc[1], 32, 32, 'rgba(127, 127, 127, 0.7)');
-				}
-			}
 		} else {
 			core.setStatusBarInnerHTML('hp', obj.hp);
 			core.setStatusBarInnerHTML('atk', obj.atk);
 			core.setStatusBarInnerHTML('def', obj.def);
-			core.drawValidGrids();
 			// 绘制显伤
 		}
+		core.drawValidGrids();
+		if (core.isInGame() && (obj == null || flags.choose[0] != flags.turn)) {
+			var values = core.plugin.players[flags.turn];
+			for (var i in values) {
+				core.clearMap('color', 32 * values[i].loc[0], 32 * values[i].loc[1], 32, 32);
+				core.fillRect('color', 32 * values[i].loc[0], 32 * values[i].loc[1], 32, 32, 'rgba(127, 127, 127, 0.7)');
+			}
+		}
+
 		this.updateDamage();
 	}
 
@@ -284,7 +350,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setFont('damage', "bold 11px Arial");
 		core.setTextAlign('damage', "left");
 		if (!core.isInGame()) return;
-		var hasObj = core.hasObj();
+		var hasObj = core.hasObj() && flags.choose[0] == flags.turn;
 		var values = core.plugin.players[1 - flags.turn];
 		values.forEach(function (one) {
 			if (hasObj) {
@@ -294,6 +360,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			}
 		});
 		core.plugin.players[0].concat(core.plugin.players[1]).forEach(function (one) {
+			if (core.plugin.isMoving && one == flags.obj) return;
 			core.fillBoldText('damage', one.hp, 32 * one.loc[0] + 1, 32 * (one.loc[1] + 1) - 1, '#FFFFFF');
 		})
 	}
