@@ -475,7 +475,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		});
 
 		socket.on('error', function (reason) {
-			core.insertAction(["\t[错误]" + (reason || "未知错误"), { "type": "lose" }]);
+			core.insertAction(["\t[错误]" + (reason || "未知错误"), { "type": "restart" }]);
 		})
 
 		socket.on('msg', function (data) {
