@@ -32,7 +32,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		def: 0,
 		dis: 3,
 		special: 1,
-		specialText: '自爆',
+		specialText: '自爆光环',
 		specialHint: '死亡时对方单位生命值变成1，且周围九宫格内对方单位生命值减半',
 		point: 0
 	},
@@ -43,7 +43,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		def: 0,
 		dis: 3,
 		special: 3,
-		specialText: '退化',
+		specialText: '退化光环',
 		specialHint: '死亡时周围九宫格范围内对方单位攻防各降低20%',
 		point: 0
 	},
@@ -54,7 +54,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		def: 0,
 		dis: 2,
 		special: 2,
-		specialText: '鼓舞',
+		specialText: '鼓舞光环',
 		specialHint: '在此单位九宫格范围内的战斗，己方单位获得15点护盾',
 		point: 1
 	},
