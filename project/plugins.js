@@ -2,24 +2,27 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 {
     "init": function () {
 	this.monsters = [{
+			hpmax: 150,
 			hp: 150,
 			atk: 14,
 			def: 4,
-			dis: 2,
+			dis: 4,
 			level: 1
 		},
 		{
+			hpmax: 175,
 			hp: 175,
-			atk: 18,
+			atk: 19,
 			def: 3,
 			dis: 3,
 			level: 2,
 		},
 		{
+			hpmax: 200,
 			hp: 200,
-			atk: 22,
+			atk: 23,
 			def: 5,
-			dis: 4,
+			dis: 3,
 			level: 3
 		},
 		{
@@ -108,7 +111,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	this.getMonster = function (x, y) {
 		if (!this.isInGame()) return null;
 		for (var i = 0; i < this.players.length; i++) {
-			for (var j = 0; j < this.players[flags.turn].length; j++) {
+			for (var j = 0; j < this.players[i].length; j++) {
 				if (this.players[i][j].loc[0] == x && this.players[i][j].loc[1] == y) {
 					return [i, j];
 				}
@@ -190,6 +193,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var routes = this.getMovablePoints();
 		var route = routes[x + "," + y];
 		if (route == null) return;
+		flags.id = core.getBlockId(x, y);
 
 		// 行走动画
 		this.isMoving = true;
@@ -214,6 +218,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			}
 		}
 		if (index == null) {
+			// 检查血瓶
+			if (flags.id == 'redPotion') flags.obj.hp += core.values.redPotion;
+			else if (flags.id == 'bluePotion') flags.obj.hp += core.values.bluePotion;
+			flags.obj.hp = Math.min(flags.obj.hp, flags.obj.hpmax);
+			flags.id = null;
+
 			flags.obj.loc[0] = x;
 			flags.obj.loc[1] = y;
 		} else {
@@ -241,7 +251,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					return;
 				}
 			} else {
-				this.players[flags.turn].splice(flags.choose, 1);
+				this.players[flags.turn].splice(flags.choose[1], 1);
 				one.hp -= damage[1];
 				core.setBlock(one.id, x, y);
 			}
@@ -257,7 +267,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	this.drawTurnTip = function () {
 		var win = this.checkWin();
 		if (win == -1) {
-			core.drawTip(flags.turn == 0 ? "己方回合" : "对方回合");
+			core.drawTip(flags.turn == 0 ? "我方回合" : "对方回合");
 		} else {
 			core.insertAction({ "type": "insert", "name": "获胜与失败", "args": [win] });
 		}
@@ -298,10 +308,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (core.isInGame()) core.getMonsterObj();
 		var obj = core.getFlag('obj');
 		if (obj == null) {
+			core.setStatusBarInnerHTML('hpmax', '---');
 			core.setStatusBarInnerHTML('hp', '---');
 			core.setStatusBarInnerHTML('atk', '---');
 			core.setStatusBarInnerHTML('def', '---');
 		} else {
+			core.setStatusBarInnerHTML('hpmax', obj.hpmax);
 			core.setStatusBarInnerHTML('hp', obj.hp);
 			core.setStatusBarInnerHTML('atk', obj.atk);
 			core.setStatusBarInnerHTML('def', obj.def);

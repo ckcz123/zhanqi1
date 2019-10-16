@@ -32,7 +32,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						"action": [
 							{
 								"type": "function",
-								"function": "function(){\nflags.obj.hp += 20 * flags.arg1\n}"
+								"function": "function(){\nflags.obj.hp = Math.min(flags.obj.hp + 20 * flags.arg1, flags.obj.hpmax);\n}"
 							}
 						]
 					}
