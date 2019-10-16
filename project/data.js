@@ -8,9 +8,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bg.jpg",
 			"winskin.png"
 		],
-		"tilesets": [
-			"magictower.png"
-		],
+		"tilesets": [],
 		"animates": [
 			"hand",
 			"sword",
@@ -252,8 +250,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"redJewel": 3,
 		"blueJewel": 3,
 		"greenJewel": 5,
-		"redPotion": 50,
-		"bluePotion": 100,
+		"redPotion": 30,
+		"bluePotion": 50,
 		"yellowPotion": 500,
 		"greenPotion": 800,
 		"breakArmor": 0.9,

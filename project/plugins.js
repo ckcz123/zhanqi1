@@ -33,7 +33,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		dis: 3,
 		special: 1,
 		specialText: '自爆',
-		specialHint: '战斗后对方单位生命值变成1；打死此单位不触发加点',
+		specialHint: '死亡时对方单位生命值变成1，且周围九宫格内对方单位生命值减半',
+		point: 0
+	},
+	{
+		hpmax: 1,
+		hp: 1,
+		atk: 1,
+		def: 0,
+		dis: 3,
+		special: 3,
+		specialText: '退化',
+		specialHint: '死亡时周围九宫格范围内对方单位攻防各降低20%',
 		point: 0
 	},
 	{
@@ -62,8 +73,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	// 怪物ID，坐标
 	this.monsterIds = [
-		['greenSlime', 'redSlime', 'blackSlime', 'goldHornSlime', 'silverSlime', 'slimelord'],
-		['bat', 'redBat', 'bigBat', 'badFairy', 'darkFairy', 'vampire']
+		['greenSlime', 'redSlime', 'blackSlime', 'goldHornSlime', 'goldSlime', 'silverSlime', 'slimelord'],
+		['bat', 'redBat', 'bigBat', 'badFairy', 'poisonBat', 'darkFairy', 'vampire']
 	]
 	this.playerMonsters = [];
 	this.playerMonsters[0] = [ // 我方
@@ -83,7 +94,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			[9, 10]
 		],
 		[
-			[4, 11],
+			[4, 11]
+		],
+		[
 			[8, 11]
 		],
 		[
@@ -110,8 +123,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			[9, 2]
 		],
 		[
-			[4, 1],
 			[8, 1]
+		],
+		[
+			[4, 1],
 		],
 		[
 			[6, 2]
@@ -243,6 +258,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		]);
 	}
 
+	this._afterBattle = function (x, y, special, values) {
+		values.forEach(function (t) {
+			if (Math.abs(t.loc[0] - x) <= 1 && Math.abs(t.loc[1] - y) <= 1) {
+				if (special == 1) t.hp -= parseInt(t.hp / 2);
+				else if (special == 3) {
+					t.atk -= parseInt(t.atk / 5);
+					t.def -= parseInt(t.def / 5);
+				}
+			}
+		});
+	}
+
 	this.afterMove = function (x, y) {
 		delete this.isMoving;
 		flags.ox = flags.obj.loc[0];
@@ -275,6 +302,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				flags.obj.loc[1] = y;
 				flags.obj.hp -= damage[1];
 
+				// 检查退化
+				this._afterBattle(x, y, one.special, this.players[flags.turn]);
+
 				if (!flags.obj.boss && one.point > 0) {
 					// 加点
 					core.insertAction([
@@ -287,6 +317,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					return;
 				}
 			} else {
+				this._afterBattle(x, y, flags.obj.special, values);
 				this.players[flags.turn].splice(flags.choose[1], 1);
 				one.hp -= damage[1];
 				core.setBlock(one.id, x, y);
@@ -604,7 +635,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (enemys.length==0) return [];
 		index = core.clamp(index, 0, enemys.length - 1);
 		var enemy = enemys[index];
-		var text = enemy.specialText == '' ? '该怪物无特殊属性' : enemy.specialText + "：" + enemy.specialHint;
+		var text = enemy.specialText == '' ? '该单位无特殊属性' : enemy.specialText + "：" + enemy.specialHint;
 		return [enemy, [text]];
 	}
 

@@ -28,11 +28,11 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						]
 					},
 					{
-						"text": "生命+${40*flag:arg1}",
+						"text": "生命+${35*flag:arg1}",
 						"action": [
 							{
 								"type": "function",
-								"function": "function(){\nflags.obj.hp = Math.min(flags.obj.hp + 40 * flags.arg1, flags.obj.hpmax);\n}"
+								"function": "function(){\nflags.obj.hp = Math.min(flags.obj.hp + 35 * flags.arg1, flags.obj.hpmax);\n}"
 							}
 						]
 					}
@@ -567,8 +567,8 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 				"true": [
 					{
 						"type": "autoText",
-						"text": "正在同步对战数据，请稍后...\n这可能需要10-15秒左右的时间。\n请勿刷新或退出游戏，以免算掉线判负。",
-						"time": 15000
+						"text": "正在同步对战数据，请稍后...\n这可能需要10秒左右的时间。\n请勿刷新或退出游戏，以免算掉线判负。",
+						"time": 10000
 					},
 					{
 						"type": "restart"

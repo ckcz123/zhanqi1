@@ -86,7 +86,7 @@ main.floors.MT0=
                         {
                             "type": "setGlobalFlag",
                             "name": "checkConsole",
-                            "value": false
+                            "value": true
                         },
                         {
                             "type": "setGlobalFlag",
