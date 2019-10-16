@@ -317,9 +317,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					return;
 				}
 			} else {
+				one.hp -= damage[1];
 				this._afterBattle(x, y, flags.obj.special, values);
 				this.players[flags.turn].splice(flags.choose[1], 1);
-				one.hp -= damage[1];
 				core.setBlock(one.id, x, y);
 			}
 		}
