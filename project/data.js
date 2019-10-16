@@ -39,12 +39,16 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startLogoStyle": "color: black",
 		"levelChoose": [
 			[
-				"左右互搏",
-				"左右互搏"
+				"竞技匹配",
+				"竞技匹配"
 			],
 			[
 				"网络对战",
 				"网络对战"
+			],
+			[
+				"左右互搏",
+				"左右互搏"
 			]
 		],
 		"equipName": [
@@ -263,7 +267,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"flags": {
 		"enableFloor": false,
 		"enableName": false,
-		"enableLv": false,
+		"enableLv": true,
 		"enableHPMax": true,
 		"enableMana": false,
 		"enableMDef": false,

@@ -534,12 +534,45 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 		"获胜与失败": [
 			{
 				"type": "if",
+				"condition": "flag:mode==2",
+				"true": [
+					{
+						"type": "function",
+						"function": "function(){\ncore.uploadResult(flags.arg1)\n}"
+					}
+				]
+			},
+			{
+				"type": "if",
 				"condition": "flag:arg1==0",
 				"true": [
 					"\t[你输了]很遗憾，对面获胜了。"
 				],
 				"false": [
-					"\t[你赢了]恭喜获胜！"
+					{
+						"type": "if",
+						"condition": "flag:arg1==1",
+						"true": [
+							"\t[你赢了]恭喜获胜！"
+						],
+						"false": [
+							"\t[平局]这盘是平局哦。"
+						]
+					}
+				]
+			},
+			{
+				"type": "if",
+				"condition": "flag:mode == 2",
+				"true": [
+					{
+						"type": "autoText",
+						"text": "正在同步对战数据，请稍后...\n这可能需要10-15秒左右的时间。\n请勿刷新或退出游戏，以免算掉线判负。",
+						"time": 15000
+					},
+					{
+						"type": "restart"
+					}
 				]
 			},
 			{

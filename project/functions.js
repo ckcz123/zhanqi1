@@ -55,9 +55,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.status.hard == '左右互搏') {
 		core.setFlag('mode', 0);
 	}
-	if (core.status.hard == '网络对战') {
+	if (core.status.hard == '娱乐对战') {
 		core.setFlag('mode', 1);
 	}
+	if (core.status.hard == '竞技匹配') {
+		core.setFlag('mode', 2);
+	}
+
+	core.clearStatusBar();
 
 	// 设置已经到过的楼层
 	core.setFlag("__visited__", {});

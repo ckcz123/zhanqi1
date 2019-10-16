@@ -194,7 +194,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var routes = this.getMovablePoints();
 		var route = routes[x + "," + y];
 		if (route == null) return;
-		flags.id = core.getBlockId(x, y);
+		flags.lastId = core.getBlockId(x, y);
 
 		// 行走动画
 		this.isMoving = true;
@@ -220,10 +220,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 		if (index == null) {
 			// 检查血瓶
-			if (flags.id == 'redPotion') flags.obj.hp += core.values.redPotion;
-			else if (flags.id == 'bluePotion') flags.obj.hp += core.values.bluePotion;
+			if (flags.lastId == 'redPotion') flags.obj.hp += core.values.redPotion;
+			else if (flags.lastId == 'bluePotion') flags.obj.hp += core.values.bluePotion;
 			flags.obj.hp = Math.min(flags.obj.hp, flags.obj.hpmax);
-			flags.id = null;
+			flags.lastId = null;
 
 			flags.obj.loc[0] = x;
 			flags.obj.loc[1] = y;
@@ -267,10 +267,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	this.drawTurnTip = function () {
 		var win = this.checkWin();
+		core.plugin.timelimit = -1;
 		if (win == -1) {
 			core.drawTip(flags.turn == 0 ? "我方回合" : "对方回合");
+			if (flags.mode == 2 && flags.turn == 0) core.plugin.timelimit = 45000;
 		} else {
-			core.insertAction({ "type": "insert", "name": "获胜与失败", "args": [win] });
+			core.endGame(win);
 		}
 	}
 
@@ -295,13 +297,41 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	this.isWaitingSocket = function () {
-		return flags.turn == 1 && flags.mode == 1;
+		return flags.turn == 1 && flags.mode != 0;
+	}
+
+	this.endGame = function (code) {
+		if (!core.isInGame()) return;
+		if (core.status.event.id == 'book') {
+			core.events.recoverEvents(core.status.event.interval);
+		}
+		this.timelimit = -1;
+		core.statusBar.money.innerText = "---";
+		core.insertAction({ "type": "insert", "name": "获胜与失败", "args": [code] });
+		if (core.status.event.data.current.type == 'wait')
+			core.doAction();
 	}
 
 },
     "rewrite": function () {
 
-	core.control.clearStatusBar = function () {}
+	core.control.clearStatusBar = function () {
+		core.statusBar.image.shop.style.opacity = 0;
+		core.statusBar.image.keyboard.style.opacity = 0;
+		core.statusBar.image.toolbox.style.opacity = 0;
+		core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
+		if (core.getFlag("mode", 0) != 0) {
+			core.statusBar.image.save.src = core.statusBar.icons.btn7.src;
+			core.statusBar.image.load.src = core.statusBar.icons.btn8.src;
+			core.statusBar.image.fly.style.opacity = 1;
+			core.statusBar.image.settings.style.opacity = 0;
+		} else {
+			core.statusBar.image.save.src = core.statusBar.icons.save.src;
+			core.statusBar.image.load.src = core.statusBar.icons.load.src;
+			core.statusBar.image.fly.style.opacity = 0;
+			core.statusBar.image.settings.style.opacity = 1;
+		}
+	}
 
 	core.control.updateStatusBar = function () {
 		core.clearMap('damage');
@@ -320,6 +350,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.setStatusBarInnerHTML('def', obj.def);
 			// 绘制显伤
 		}
+		core.setStatusBarInnerHTML('lv', core.getFlag('oid', '---'));
+		core.setStatusBarInnerHTML('money', '---');
 		core.drawValidGrids();
 		if (core.isInGame() && (obj == null || flags.choose[0] != flags.turn)) {
 			var values = core.plugin.players[flags.turn];
@@ -395,12 +427,33 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	core.statusBar.image.fly.onclick = function () {
+		if (!core.isInGame()) return;
 		if (flags.mode == 0) return;
 		core.sendMessage();
 	}
 
+	core.statusBar.image.toolbox.onclick = function () {}
+
+	core.statusBar.image.shop.onclick = function () {}
+
+	core.statusBar.image.keyboard.onclick = function () {}
+
 	core.statusBar.image.save.onclick = function () {
-		if (flags.mode == 1) return;
+		if (!core.isInGame()) return;
+		if (flags.mode != 0) {
+			// 求和
+			if (flags.askTie) {
+				core.drawTip("只能双方循环求和！");
+				return;
+			}
+
+			core.myconfirm("你想要求和么？\n只能双方循环求和！", function () {
+				flags.askTie = true;
+				core.plugin.socket.emit('asktie', flags.room, flags.order);
+				core.drawTip("求和申请已发送。");
+			});
+			return;
+		}
 		if (core.status.event.id == 'save') {
 			core.events.recoverEvents(core.status.event.interval);
 		} else {
@@ -411,7 +464,16 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	core.statusBar.image.load.onclick = function () {
-		if (flags.mode == 1) return;
+		if (!core.isInGame()) return;
+		if (flags.mode != 0) {
+			core.myconfirm("你想要认输么？", function () {
+				core.plugin.socket.emit('asklose', flags.room, flags.order);
+				core.endGame(0);
+			});
+			return;
+		}
+
+		if (flags.mode != 0) return;
 		if (core.status.event.id == 'load') {
 			core.events.recoverEvents(core.status.event.interval);
 		} else {
@@ -422,7 +484,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	core.statusBar.image.settings.onclick = function () {
-		if (flags.mode == 1) return;
+		if (!core.isInGame()) return;
+		if (flags.mode != 0) return;
 		if (core.status.event.data.current.type != 'wait') return;
 		core.insertAction([{ "type": "confirm", "text": "返回标题界面？", "yes": [{ "type": "restart" }], "no": [] }, { "type": "wait" }]);
 		core.doAction();
@@ -523,6 +586,40 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 	}
 
+	core.events.restart = function () {
+		if (core.plugin.socket) core.plugin.socket.close();
+		core.plugin.socket = null;
+		core.showStartAnimate();
+		core.playBgm(main.startBgm);
+	}
+
+	var lastTime = 0;
+	this.timelimit = -1;
+	core.registerAnimationFrame("check", false, function (timestamp) {
+		var delta = timestamp - lastTime;
+		if (core.isInGame()) {
+			if (flags.mode == 2 && core.consoleOpened()) {
+				alert("你在竞技匹配中开启了控制台！直接判负并结束");
+				core.plugin.socket.close();
+				core.restart();
+				return;
+			}
+			if (flags.mode == 2 && core.plugin.timelimit >= 0) {
+				core.plugin.timelimit -= delta;
+				if (core.plugin.timelimit <= 0) {
+					alert("回合超时，直接判负！");
+					core.plugin.socket.emit('timeout', flags.room);
+					core.plugin.socket.close();
+					core.restart();
+					return;
+				}
+				core.statusBar.money.innerText = (core.plugin.timelimit/1000).toFixed(2);
+			}
+		}
+
+		lastTime = timestamp;
+	})
+
 },
     "socket": function () {
 	if (!io) {
@@ -556,17 +653,52 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.insertAction(["\t[错误]" + (reason || "未知错误"), { "type": "restart" }]);
 		})
 
-		socket.on('msg', function (data) {
-			if (data[0] != flags.order) {
-				core.drawTip("对方消息：" + data[1]);
+		socket.on('disconnect', function () {
+			core.insertAction(["\t[提示]对方断开了链接", { "type": "restart" }]);
+		})
+
+		socket.on('players', function (data) {
+			if (flags.mode == 2) {
+				flags.oid = data[0] == flags.id ? data[1] : data[0];
 			}
 		})
 
+		socket.on('msg', function (data) {
+			if (data[0] == flags.order) return;
+			core.drawTip("对方消息：" + data[1]);
+		})
+
 		socket.on('put', function (data) {
-			if (data[0] != flags.order) {
-				console.log(data[1]);
-				core.push(core.plugin.steps, data[1]);
+			if (data[0] == flags.order) return;
+			console.log(data[1]);
+			core.push(core.plugin.steps, data[1]);
+		})
+
+		socket.on('asktie', function (data) {
+			if (data == flags.order) return;
+			flags.askTie = false;
+			core.myconfirm("对方求和，是否同意？", function () {
+				socket.emit('asktie_res', flags.room, [flags.order, true]);
+				core.endGame(2);
+			}, function () {
+				socket.emit('asktie_res', flags.room, [flags.order, false]);
+			});
+		})
+
+		socket.on('asktie_res', function (data) {
+			if (data[0] == flags.order) return;
+			if (data[1]) {
+				core.drawTip("对方同意了平局");
+				core.endGame(2);
+			} else {
+				core.drawTip("对方拒绝了平局");
 			}
+		})
+
+		socket.on('asklose', function (data) {
+			if (data == flags.order) return;
+			core.drawTip("对方投降了");
+			core.endGame(1);
 		})
 
 		this.socket = socket;
@@ -574,14 +706,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	this.connect = function () {
 		setTimeout(function () {
-			core.plugin.socket.emit('join', flags.input);
+			core.plugin.socket.emit('join', flags.input || 0, flags.mode);
 		}, 250);
 	}
 
 	this.ready = function () {
 		this.initMonsters();
 		setTimeout(function () {
-			core.plugin.socket.emit('ready', flags.room);
+			core.plugin.socket.emit('ready', flags.room, flags.id, flags.password);
 		}, 250);
 	}
 
@@ -599,6 +731,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		];
 		var choice = this.getLastChoice();
 		if (choice != null) data.push(choice);
+		if (flags.mode == 2) {
+			this.timelimit = -1;
+			core.statusBar.money.innerText = '---';
+		}
 		this.socket.emit('put', flags.room, [flags.order, data]);
 	}
 
@@ -618,6 +754,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.myprompt("请输入对话消息：", "", function (text) {
 				if (text) core.plugin.socket.emit('msg', flags.room, [flags.order, text]);
 			})
+		}
+	}
+
+	this.uploadResult = function (result) {
+		if (this.isInGame() && flags.mode == 2) {
+			core.plugin.socket.emit('result', flags.room, result);
 		}
 	}
 

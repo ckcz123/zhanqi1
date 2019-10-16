@@ -60,13 +60,65 @@ main.floors.MT0=
             ],
             "false": [
                 {
+                    "type": "if",
+                    "condition": "flag:mode == 2",
+                    "true": [
+                        {
+                            "type": "setValue",
+                            "name": "flag:id",
+                            "value": "core.getCookie(\"id\")"
+                        },
+                        {
+                            "type": "setValue",
+                            "name": "flag:password",
+                            "value": "core.getCookie(\"password\")"
+                        },
+                        {
+                            "type": "if",
+                            "condition": "!flag:id || !flag:password",
+                            "true": [
+                                "只有登录的情况下才能参与竞技匹配！",
+                                {
+                                    "type": "restart"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "setGlobalFlag",
+                            "name": "checkConsole",
+                            "value": false
+                        },
+                        {
+                            "type": "setGlobalFlag",
+                            "name": "enableMoney",
+                            "value": true
+                        },
+                        {
+                            "type": "if",
+                            "condition": "core.consoleOpened()",
+                            "true": [
+                                "竞技匹配下不可开启控制台！对局过程中一旦发现开启直接判负！\n请关闭控制台后重新进行匹配。",
+                                {
+                                    "type": "restart"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
                     "type": "function",
                     "function": "function(){\ncore.initSocket()\n}"
                 },
-                "请输入房间号（存在则加入，不存在则建房）。\n也可以直接点取消进入匹配模式。",
                 {
-                    "type": "input",
-                    "text": "请输入房间号"
+                    "type": "if",
+                    "condition": "flag:mode==1",
+                    "true": [
+                        "请输入房间号（存在则加入，不存在则建房）。\n也可以直接点取消进入匹配模式。",
+                        {
+                            "type": "input",
+                            "text": "请输入房间号"
+                        }
+                    ]
                 },
                 {
                     "type": "function",
