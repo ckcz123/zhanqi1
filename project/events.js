@@ -10,29 +10,29 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 				"type": "choices",
 				"choices": [
 					{
-						"text": "攻击+${flag:arg1}",
+						"text": "攻击+${5*flag:arg1}",
 						"action": [
 							{
 								"type": "function",
-								"function": "function(){\nflags.obj.atk += flags.arg1\n}"
+								"function": "function(){\nflags.obj.atk += 5*flags.arg1\n}"
 							}
 						]
 					},
 					{
-						"text": "防御+${flag:arg1}",
+						"text": "防御+${2*flag:arg1}",
 						"action": [
 							{
 								"type": "function",
-								"function": "function(){\nflags.obj.def += flags.arg1\n}"
+								"function": "function(){\nflags.obj.def += 2*flags.arg1\n}"
 							}
 						]
 					},
 					{
-						"text": "生命+${20*flag:arg1}",
+						"text": "生命+${40*flag:arg1}",
 						"action": [
 							{
 								"type": "function",
-								"function": "function(){\nflags.obj.hp = Math.min(flags.obj.hp + 20 * flags.arg1, flags.obj.hpmax);\n}"
+								"function": "function(){\nflags.obj.hp = Math.min(flags.obj.hp + 40 * flags.arg1, flags.obj.hpmax);\n}"
 							}
 						]
 					}

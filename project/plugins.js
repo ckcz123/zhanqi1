@@ -2,83 +2,122 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 {
     "init": function () {
 	this.monsters = [{
-			hpmax: 150,
-			hp: 150,
-			atk: 14,
-			def: 4,
-			dis: 4,
-			level: 1
-		},
-		{
-			hpmax: 175,
-			hp: 175,
-			atk: 19,
-			def: 3,
-			dis: 3,
-			level: 2,
-		},
-		{
-			hpmax: 200,
-			hp: 200,
-			atk: 23,
-			def: 5,
-			dis: 3,
-			level: 3
-		},
-		{
-			hpmax: 1,
-			hp: 1,
-			atk: 641,
-			def: 0,
-			dis: 1,
-			boss: true
-		}
-	];
+		hpmax: 50,
+		hp: 50,
+		atk: 10,
+		def: 3,
+		dis: 2,
+		point: 1
+	},
+	{
+		hpmax: 25,
+		hp: 25,
+		atk: 20,
+		def: 0,
+		dis: 4,
+		point: 1
+	},
+	{
+		hpmax: 60,
+		hp: 60,
+		atk: 10,
+		def: 6,
+		dis: 2,
+		point: 1
+	},
+	{
+		hpmax: 1,
+		hp: 1,
+		atk: 1,
+		def: 0,
+		dis: 3,
+		special: 1,
+		specialText: '自爆',
+		specialHint: '战斗后对方单位生命值变成1；打死此单位不触发加点',
+		point: 0
+	},
+	{
+		hpmax: 30,
+		hp: 30,
+		atk: 5,
+		def: 0,
+		dis: 2,
+		special: 2,
+		specialText: '鼓舞',
+		specialHint: '在此单位九宫格范围内的战斗，己方单位获得15点护盾',
+		point: 1
+	},
+	{
+		hpmax: 10,
+		hp: 10,
+		atk: 641,
+		def: 0,
+		dis: 1,
+		boss: true,
+		specialText: '王者',
+		specialHint: '此单位无法获得加点，死亡则立即判负',
+		point: 0
+	}
+];
 
 	// 怪物ID，坐标
 	this.monsterIds = [
-		['greenSlime', 'redSlime', 'blackSlime', 'slimelord'],
-		['bat', 'bigBat', 'redBat', 'vampire']
+		['greenSlime', 'redSlime', 'blackSlime', 'goldHornSlime', 'silverSlime', 'slimelord'],
+		['bat', 'redBat', 'bigBat', 'badFairy', 'darkFairy', 'vampire']
 	]
 	this.playerMonsters = [];
 	this.playerMonsters[0] = [ // 我方
 		[
+			[2, 9],
+			[4, 9],
 			[6, 9],
+			[8, 9],
+			[10, 9]
+		],
+		[
 			[5, 10],
-			[7, 10],
+			[7, 10]
+		],
+		[
+			[3, 10],
+			[9, 10]
+		],
+		[
 			[4, 11],
 			[8, 11]
 		],
 		[
-			[6, 10],
-			[5, 11],
-			[7, 11]
+			[6, 10]
 		],
 		[
 			[6, 11]
-		],
-		[
-			[6, 12]
 		]
 	];
 	this.playerMonsters[1] = [ // 对方
 		[
+			[2, 3],
+			[4, 3],
 			[6, 3],
+			[8, 3],
+			[10, 3]
+		],
+		[
 			[5, 2],
-			[7, 2],
+			[7, 2]
+		],
+		[
+			[3, 2],
+			[9, 2]
+		],
+		[
 			[4, 1],
 			[8, 1]
 		],
 		[
-			[6, 2],
-			[5, 1],
-			[7, 1]
+			[6, 2]
 		],
 		[
 			[6, 1]
-		],
-		[
-			[6, 0]
 		]
 	];
 	this.players = [
@@ -236,14 +275,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				flags.obj.loc[1] = y;
 				flags.obj.hp -= damage[1];
 
-				var point = 4;
-				if (flags.obj.level > one.level) point /= 2;
-				else if (flags.obj.level < one.level) point *= 2;
-
-				if (!one.boss) {
+				if (!flags.obj.boss && one.point > 0) {
 					// 加点
 					core.insertAction([
-						{ "type": "insert", "name": "加点事件", "args": [point] },
+						{ "type": "insert", "name": "加点事件", "args": [one.point] },
 						{ "type": "function", "function": "function () { core.put(); }" },
 						{ "type": "setValue", "name": "flag:choose", "value": "null" },
 						{ "type": "setValue", "name": "flag:turn", "value": "1-flag:turn" },
@@ -376,17 +411,37 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			eatk = one.atk,
 			edef = one.def;
 
+		// 自爆
+		if (one.special == 1) return [1, hp - 1];
+		if (flags.obj.special == 1) return [0, ehp - 1];
+
 		if (atk <= edef) return [0, 0];
 		if (eatk <= def) return [1, 0];
+
+		// 鼓舞
+		var curplayer = flags.choose[0];
+		for (var j = 0; j < core.plugin.players[curplayer].length; j++) {
+			var temp = core.plugin.players[curplayer][j];
+			if (temp.special == 2 && Math.abs(temp.loc[0] - one.loc[0]) <= 1 && Math.abs(temp.loc[1] - one.loc[1]) <= 1) {
+				hp += 15;
+			}
+		}
+		var otherplayer = 1 - curplayer;
+		for (var j = 0; j < core.plugin.players[otherplayer].length; j++) {
+			var temp = core.plugin.players[otherplayer][j];
+			if (temp.special == 2 && Math.abs(temp.loc[0] - one.loc[0]) <= 1 && Math.abs(temp.loc[1] - one.loc[1]) <= 1) {
+				ehp += 15;
+			}
+		}
 
 		var d = atk - edef,
 			ed = eatk - def;
 		// 直接循环计算吧
 		while (true) {
 			ehp -= d;
-			if (ehp <= 0) return [1, flags.obj.hp - hp];
+			if (ehp <= 0) return [1, Math.max(0, flags.obj.hp - hp)];
 			hp -= ed;
-			if (hp <= 0) return [0, one.hp - ehp];
+			if (hp <= 0) return [0, Math.max(0, one.hp - ehp)];
 		}
 	}
 
@@ -506,7 +561,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.plugin.players[1 - flags.turn].forEach(function (one) {
 			var damage = core.getDamage(one);
 			var enemyInfo = core.material.enemys[one.id];
-			var e = Object.assign({ able: damage[0], damage: damage[1], name: enemyInfo.name, specialText: '' }, one);
+			var e = Object.assign({ able: damage[0], damage: damage[1], name: enemyInfo.name, specialText: one.specialText || '' }, one);
 			if (!has(e)) res.push(e);
 		});
 		return res.sort(function (a, b) {
@@ -517,6 +572,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			if (b.able) return 1;
 			return b.damage - a.damage;
 		});
+	}
+
+	core.ui._drawBook_drawRow2 = function (index, enemy, top, left, width, position) {
+		// 绘制第二行
+		core.setTextAlign('ui', 'left');
+		var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
+		var col1 = left, col2 = left + width * 9 / 25;
+		core.fillText('ui', "机动", col1, position, '#DDDDDD', f13);
+		core.fillText('ui', enemy.dis, col1 + 30, position, null, b13);
+		core.fillText('ui', "加点", col2, position, '#DDDDDD', f13);
+		core.fillText('ui', enemy.point, col2 + 30, position, null, b13);
 	}
 
 	core.ui._drawBook_drawRow3 = function (index, enemy, top, left, width, position) {
@@ -532,7 +598,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	core.ui._drawBook_drawDamage = function () {}
 
-	core.ui.drawBookDetail = function () {}
+	core.ui._drawBookDetail_getInfo = function (index) {
+		var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
+		var enemys = core.enemys.getCurrentEnemys(floorId);
+		if (enemys.length==0) return [];
+		index = core.clamp(index, 0, enemys.length - 1);
+		var enemy = enemys[index];
+		var text = enemy.specialText == '' ? '该怪物无特殊属性' : enemy.specialText + "：" + enemy.specialHint;
+		return [enemy, [text]];
+	}
 
 	core.control.saveData = function () {
 		var data = {
