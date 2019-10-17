@@ -1,7 +1,7 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
     "init": function () {
-	this.version = 13;
+	this.version = 15;
 
 	this.monsters = [{
 		hpmax: 50,
@@ -22,8 +22,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	{
 		hpmax: 60,
 		hp: 60,
-		atk: 10,
-		def: 6,
+		atk: 11,
+		def: 4,
 		dis: 2,
 		point: 1
 	},
