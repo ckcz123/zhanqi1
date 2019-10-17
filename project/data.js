@@ -239,7 +239,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"text": "接下来会执行startText中的事件"
 			}
 		],
-		"startText": null,
+		"startText": [
+			"欢迎来到魔塔战棋。\n请仔细阅读评论区的置顶以了解基本规则，并尝试左右互搏以更深入的了解本塔。\n\n如有问题，欢迎加群讨论，小艾感谢大家的支持！\nHTML5魔塔交流群：\r[yellow]539113091\r\n魔塔战棋意见群：\r[yellow]853897239\r",
+		],
 		"shops": [],
 		"levelUp": []
 	},

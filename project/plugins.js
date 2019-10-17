@@ -1,12 +1,14 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
     "init": function () {
+	this.version = 13;
+
 	this.monsters = [{
 		hpmax: 50,
 		hp: 50,
 		atk: 10,
 		def: 3,
-		dis: 2,
+		dis: 3,
 		point: 1
 	},
 	{
@@ -66,7 +68,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		dis: 1,
 		boss: true,
 		specialText: '王者',
-		specialHint: '此单位无法获得加点，死亡则立即判负',
+		specialHint: '此单位死亡则立即判负',
 		point: 0
 	}
 ];
@@ -366,14 +368,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return flags.turn == 1 && flags.mode != 0;
 	}
 
-	this.endGame = function (code) {
-		if (!core.isInGame()) return;
+	this.endGame = function (code, reason) {
+		if (code >= 0 && !core.isInGame()) return;
 		if (core.status.event.id == 'book') {
 			core.events.recoverEvents(core.status.event.interval);
 		}
 		this.timelimit = -1;
 		core.statusBar.money.innerText = "---";
-		core.insertAction({ "type": "insert", "name": "获胜与失败", "args": [code] });
+		if (code >= 0) {
+			core.insertAction({ "type": "insert", "name": "获胜与失败", "args": [code] });
+		} else {
+			core.insertAction(["\t[系统消息]" + (reason || "未知错误"), { "type": "restart" }]);
+		}
 		if (core.status.event.data.current.type == 'wait')
 			core.doAction();
 	}
@@ -601,7 +607,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				return -1;
 			}
 			if (b.able) return 1;
-			return b.damage - a.damage;
+			return b.damage - a.damage;e
 		});
 	}
 
@@ -755,11 +761,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		});
 
 		socket.on('error', function (reason) {
-			core.insertAction(["\t[错误]" + (reason || "未知错误"), { "type": "restart" }]);
-		})
-
-		socket.on('disconnect', function () {
-			core.insertAction(["\t[提示]对方断开了链接", { "type": "restart" }]);
+			core.endGame(-1, reason);
 		})
 
 		socket.on('players', function (data) {
@@ -817,7 +819,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	this.ready = function () {
 		this.initMonsters();
 		setTimeout(function () {
-			core.plugin.socket.emit('ready', flags.room, flags.id, flags.password);
+			core.plugin.socket.emit('ready', flags.room, flags.id, flags.password, core.plugin.version);
 		}, 250);
 	}
 
