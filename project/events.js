@@ -355,13 +355,23 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						"function": "function(){\ncore.ready()\n}"
 					},
 					{
+						"type": "setValue",
+						"name": "flag:waitTime",
+						"value": "0"
+					},
+					{
 						"type": "while",
 						"condition": "true",
 						"data": [
 							{
 								"type": "autoText",
-								"text": "请等待对方准备好...",
+								"text": "请等待对方准备好...  ${parseInt(flag:waitTime/1000)}s\n此时刷新退出不记录成绩。",
 								"time": 250
+							},
+							{
+								"type": "setValue",
+								"name": "flag:waitTime",
+								"value": "flag:waitTime+250"
 							}
 						]
 					},
