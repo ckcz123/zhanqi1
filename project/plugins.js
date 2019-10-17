@@ -753,7 +753,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			// order: 0先手，1后手
 			flags.order = order;
 			flags.room = room;
-			core.insertAction(["开始游戏！\n你当前" + (order == 0 ? "先手" : "后手") + "。", { "type": "break" }]);
+			core.insertAction(["开始游戏！\n你当前" + (order == 0 ? "先手" : "后手") + "。\n单击以准备游戏。", { "type": "break" }]);
 		});
 
 		socket.on('ready', function () {
