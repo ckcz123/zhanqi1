@@ -422,7 +422,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.setStatusBarInnerHTML('def', obj.def);
 			// 绘制显伤
 		}
-		core.setStatusBarInnerHTML('lv', core.getFlag('oid', '---'));
+		core.setStatusBarInnerHTML('lv', '---');
+		core.statusBar.lv.innerText = core.getFlag('oid', '---');
 		core.setStatusBarInnerHTML('money', '---');
 		core.drawValidGrids();
 		if (core.isInGame() && (obj == null || flags.choose[0] != flags.turn)) {
