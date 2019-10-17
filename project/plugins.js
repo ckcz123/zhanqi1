@@ -710,7 +710,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var delta = timestamp - lastTime;
 		if (core.isInGame()) {
 			if (flags.mode == 2 && core.consoleOpened()) {
-				alert("你在竞技匹配中开启了控制台！直接判负并结束");
+				core.myconfirm("你在竞技匹配中开启了控制台！直接判负并结束");
 				core.plugin.socket.close();
 				core.restart();
 				return;
@@ -718,7 +718,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			if (flags.mode == 2 && core.plugin.timelimit >= 0) {
 				core.plugin.timelimit -= delta;
 				if (core.plugin.timelimit <= 0) {
-					alert("回合超时，直接判负！");
+					core.myconfirm("回合超时，直接判负！");
 					core.plugin.socket.emit('timeout', flags.room);
 					core.plugin.socket.close();
 					core.restart();
