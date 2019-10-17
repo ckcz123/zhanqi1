@@ -135,7 +135,7 @@ main.floors.MT0=
                     "data": [
                         {
                             "type": "autoText",
-                            "text": "正在等待其他玩家加入，请稍后...  ${parseInt(flag:waitTime/1000)}s\n刷新界面以退出。",
+                            "text": "正在等待其他玩家加入，请稍后...  ${parseInt(flag:waitTime/1000)}s\n刷新界面以退出。\n（若长时间匹配不上可以尝试刷新重试）",
                             "time": 250
                         },
                         {
