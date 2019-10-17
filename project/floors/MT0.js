@@ -125,13 +125,23 @@ main.floors.MT0=
                     "function": "function(){\ncore.connect()\n}"
                 },
                 {
+                    "type": "setValue",
+                    "name": "flag:waitTime",
+                    "value": "0"
+                },
+                {
                     "type": "while",
                     "condition": "true",
                     "data": [
                         {
                             "type": "autoText",
-                            "text": "正在等待其他玩家加入，请稍后...\n刷新界面以退出。",
+                            "text": "正在等待其他玩家加入，请稍后...  ${parseInt(flag:waitTime/1000)}s\n刷新界面以退出。",
                             "time": 250
+                        },
+                        {
+                            "type": "setValue",
+                            "name": "flag:waitTime",
+                            "value": "flag:waitTime+250"
                         }
                     ]
                 },
