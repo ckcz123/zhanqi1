@@ -540,7 +540,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	core.statusBar.image.keyboard.onclick = function () {}
 
 	core.statusBar.image.save.onclick = function () {
-		if (!core.isInGame()) return;
+		if (!core.isInGame() || flags.mode==-1) return;
 		if (flags.mode != 0) {
 			// 求和
 			if (flags.askTie) {
@@ -565,7 +565,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	core.statusBar.image.load.onclick = function () {
-		if (!core.isInGame()) return;
+		if (!core.isInGame() || flags.mode==-1) return;
 		if (flags.mode != 0) {
 			core.myconfirm("你想要认输么？", function () {
 				core.plugin.socket.emit('asklose', flags.room, flags.order);
