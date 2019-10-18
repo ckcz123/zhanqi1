@@ -89,11 +89,6 @@ main.floors.MT0=
                             "value": true
                         },
                         {
-                            "type": "setGlobalFlag",
-                            "name": "enableMoney",
-                            "value": true
-                        },
-                        {
                             "type": "if",
                             "condition": "core.consoleOpened()",
                             "true": [

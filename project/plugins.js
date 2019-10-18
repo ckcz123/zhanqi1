@@ -1,7 +1,7 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
     "init": function () {
-	this.version = 15;
+	this.version = 17;
 
 	this.monsters = [{
 		hpmax: 50,
@@ -425,6 +425,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setStatusBarInnerHTML('lv', '---');
 		core.statusBar.lv.innerText = core.getFlag('oid', '---');
 		core.setStatusBarInnerHTML('money', '---');
+		core.setStatusBarInnerHTML('experience', core.getFlag('mode', 0) == 2 ? core.plugin.timelimitCount : '---');
 		core.drawValidGrids();
 		if (core.isInGame() && (obj == null || flags.choose[0] != flags.turn)) {
 			var values = core.plugin.players[flags.turn];
@@ -488,15 +489,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setFont('damage', "bold 11px Arial");
 		core.setTextAlign('damage', "left");
 		if (!core.isInGame()) return;
-		var hasObj = core.hasObj() && flags.choose[0] == flags.turn;
-		var values = core.plugin.players[1 - flags.turn];
-		values.forEach(function (one) {
-			if (hasObj) {
+		if (core.hasObj()) {
+			core.plugin.players[1 - flags.choose[0]].forEach(function (one) {
 				var damage = core.getDamage(one);
 				var color = damage[0] ? '#FFFF00' : '#FF0000';
 				core.fillBoldText('damage', damage[1], 32 * one.loc[0] + 1, 32 * (one.loc[1] + 1) - 11, color);
-			}
-		});
+			});
+		}
 		core.plugin.players[0].concat(core.plugin.players[1]).forEach(function (one) {
 			if (core.plugin.isMoving && one == flags.obj) return;
 			core.fillBoldText('damage', one.hp, 32 * one.loc[0] + 1, 32 * (one.loc[1] + 1) - 1, '#FFFFFF');
@@ -513,6 +512,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (core.status.event.id == 'book') {
 			core.events.recoverEvents(core.status.event.interval);
 		} else {
+			// 对方回合查看怪物手册？
+			if (flags.turn == 1 && core.status.event.data.current.type == 'sleep' && core.timeout.sleepTimeout) {
+				clearTimeout(core.timeout.sleepTimeout);
+				core.timeout.sleepTimeout = null;
+				core.insertAction([{ "type": "callBook" }]);
+				core.doAction();
+				return;
+			}
+
 			if (core.status.event.data.current.type != 'wait') return;
 			core.insertAction([{ "type": "callBook" }, { "type": "wait" }]);
 			core.doAction();
@@ -596,7 +604,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			}
 			return false;
 		}
-		core.plugin.players[1 - flags.turn].forEach(function (one) {
+		var turn = flags.turn;
+		if (core.hasObj()) turn = flags.choose[0];
+		core.plugin.players[1 - turn].forEach(function (one) {
 			var damage = core.getDamage(one);
 			var enemyInfo = core.material.enemys[one.id];
 			var e = Object.assign({ able: damage[0], damage: damage[1], name: enemyInfo.name, specialText: one.specialText || '' }, one);
@@ -705,10 +715,43 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.playBgm(main.startBgm);
 	}
 
+	core.ui._drawTip_animate = function (text, info, textX, textY, width, height) {
+		var alpha = 0, hide = false;
+		core.interval.tipAnimate = window.setInterval(function () {
+			if (hide) alpha -= 0.1;
+			else alpha += 0.1;
+			core.clearMap('data', 5, 5, core.ui.PIXEL, height);
+			core.setAlpha('data', alpha);
+			core.fillRect('data', 5, 5, width, height, '#000');
+			if (info)
+				core.drawImage('data', info.image, info.posX * 32, info.posY * 32, 32, 32, 10, 8, 32, 32);
+			core.fillText('data', text, textX + 5, textY + 15, '#fff');
+			core.setAlpha('data', 1);
+			if (alpha > 0.6 || alpha < 0) {
+				if (hide) {
+					core.clearMap('data', 5, 5, core.ui.PIXEL, height);
+					clearInterval(core.interval.tipAnimate);
+					return;
+				}
+				else {
+					if (!core.timeout.tipTimeout) {
+						core.timeout.tipTimeout = window.setTimeout(function () {
+							hide = true;
+							core.timeout.tipTimeout = null;
+						}, 3000);
+					}
+					alpha = 0.6;
+				}
+			}
+		}, 30);
+	}
+
 	var lastTime = 0;
 	this.timelimit = -1;
+	this.timelimitCount = 3;
 	core.registerAnimationFrame("check", false, function (timestamp) {
 		var delta = timestamp - lastTime;
+		if (delta < 50) return;
 		if (core.isInGame()) {
 			if (flags.mode == 2 && core.consoleOpened()) {
 				core.myconfirm("你在竞技匹配中开启了控制台！直接判负并结束");
@@ -719,13 +762,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			if (flags.mode == 2 && core.plugin.timelimit >= 0) {
 				core.plugin.timelimit -= delta;
 				if (core.plugin.timelimit <= 0) {
-					core.myconfirm("回合超时，直接判负！");
-					core.plugin.socket.emit('timeout', flags.room);
-					core.plugin.socket.close();
-					core.restart();
-					return;
+					if (core.plugin.timelimitCount == 0) {
+						core.myconfirm("回合超时，直接判负！");
+						core.plugin.socket.emit('timeout', flags.room);
+						core.plugin.socket.close();
+						core.restart();
+						return;
+					}
+					core.drawTip("你使用了一次超时机会，额外增加30秒");
+					core.plugin.timelimitCount--;
+					core.plugin.timelimit = 30000;
+					core.statusBar.experience.innerText = core.plugin.timelimitCount;
 				}
-				core.statusBar.money.innerText = (core.plugin.timelimit/1000).toFixed(2);
+				core.setStatusBarInnerHTML('money', (core.plugin.timelimit/1000).toFixed(2), core.plugin.timelimit<=15000 ? 'color:red' : '');
 			}
 		}
 
@@ -779,6 +828,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		socket.on('put', function (data) {
 			if (data[0] == flags.order) return;
 			core.push(core.plugin.steps, data[1]);
+			if (core.status.event.id == 'book') {
+				core.recoverEvents(core.status.event.interval);
+			}
 		})
 
 		socket.on('asktie', function (data) {
