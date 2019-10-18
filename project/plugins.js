@@ -802,7 +802,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		if (this.socket != null) this.socket.close();
 		this.steps = [];
-		var socket = io('https://h5mota.com:5050/zhanqi1', { secure: true });
+		var socket = io(':5050/zhanqi1', { secure: true });
 
 		socket.on('start', function (order, room) {
 			// order: 0先手，1后手
