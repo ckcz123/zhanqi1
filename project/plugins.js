@@ -1,7 +1,7 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
     "init": function () {
-	this.version = 17;
+	this.version = 18;
 
 	this.monsters = [{
 		hpmax: 50,
@@ -365,7 +365,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	this.isWaitingSocket = function () {
-		return flags.turn == 1 && flags.mode != 0;
+		return flags.mode == -1 || (flags.turn == 1 && flags.mode != 0);
 	}
 
 	this.endGame = function (code, reason) {
@@ -779,7 +779,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 
 		lastTime = timestamp;
-	})
+	});
+
+	//	观战模式
+	main.dom.loadGame.onclick = function() {
+		core.events.startGame("观战模式");
+	}
 
 },
     "socket": function () {
@@ -797,7 +802,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		if (this.socket != null) this.socket.close();
 		this.steps = [];
-		var socket = io(':5050/zhanqi1', { secure: true });
+		var socket = io('https://h5mota.com:5050/zhanqi1', { secure: true });
 
 		socket.on('start', function (order, room) {
 			// order: 0先手，1后手
@@ -860,12 +865,22 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.endGame(1);
 		})
 
+		socket.on('watch', function (data) {
+			core.push(core.plugin.steps, data.split("\n"));
+		});
+
 		this.socket = socket;
 	}
 
 	this.connect = function () {
 		setTimeout(function () {
 			core.plugin.socket.emit('join', flags.input || 0, flags.mode);
+		}, 250);
+	}
+
+	this.watch = function () {
+		setTimeout(function () {
+			core.plugin.socket.emit('watch', flags.input || 0);
 		}, 250);
 	}
 
@@ -883,7 +898,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	this.put = function () {
-		if (flags.mode == 0 || flags.turn == 1) return;
+		if (flags.mode <= 0 || flags.turn == 1) return;
 		var data = [
 			[flags.ox, flags.oy],
 			[flags.x, flags.y]
@@ -900,6 +915,25 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	this.checkNextStep = function () {
 		if (this.steps.length == 0) return;
 		var value = this.steps.shift();
+		if (typeof value == 'string') {
+			if (value == 'end')	return core.endGame(-1, "对战已结束");
+			var one = value.split(" ");
+			if (one[0] == flags.turn) {
+				// 一个有效步数
+				var arr = [];
+				var x1 = parseInt(one[1]), y1 = parseInt(one[2]), x2 = parseInt(one[3]), y2 = parseInt(one[4]);
+				if (flags.turn == 0) {
+					x1 = 12 - x1; y1 = 12 - y1; x2 = 12 - x2; y2 = 12 - y2;
+				}
+
+				arr.push([x1, y1]);
+				arr.push([x2, y2]);
+				if (one[5] != null) arr.push(parseInt(one[5]));
+				core.unshift(this.steps, arr);
+			}
+			return this.checkNextStep();
+		}
+
 		flags.type = 1;
 		if (value instanceof Array) {
 			flags.x = 12 - value[0];

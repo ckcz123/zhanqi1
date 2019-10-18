@@ -332,7 +332,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 		"主循环": [
 			{
 				"type": "if",
-				"condition": "flag:mode==0",
+				"condition": "flag:mode==0 || flag:mode == -1",
 				"true": [
 					{
 						"type": "setValue",

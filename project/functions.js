@@ -61,6 +61,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.status.hard == '竞技匹配') {
 		core.setFlag('mode', 2);
 	}
+	if (core.status.hard == '观战模式') {
+		core.setFlag('mode', -1);
+	}
 
 	core.clearStatusBar();
 

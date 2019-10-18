@@ -106,43 +106,64 @@ main.floors.MT0=
                 },
                 {
                     "type": "if",
-                    "condition": "flag:mode==1",
+                    "condition": "flag:mode==-1",
                     "true": [
-                        "请输入房间号（存在则加入，不存在则建房）。\n也可以直接点取消进入匹配模式。",
+                        "请输入观战房间号，若不存在该房间则直接退出。",
                         {
                             "type": "input",
-                            "text": "请输入房间号"
-                        }
-                    ]
-                },
-                {
-                    "type": "function",
-                    "function": "function(){\ncore.connect()\n}"
-                },
-                {
-                    "type": "setValue",
-                    "name": "flag:waitTime",
-                    "value": "0"
-                },
-                {
-                    "type": "while",
-                    "condition": "true",
-                    "data": [
+                            "text": "请输入观战房间号"
+                        },
                         {
-                            "type": "autoText",
-                            "text": "正在等待其他玩家加入，请稍后...  ${parseInt(flag:waitTime/1000)}s\n刷新界面以退出。\n（若长时间匹配不上可以尝试刷新重试）",
-                            "time": 250
+                            "type": "function",
+                            "function": "function(){\ncore.watch()\n}"
+                        },
+                        {
+                            "type": "insert",
+                            "name": "主循环"
+                        }
+                    ],
+                    "false": [
+                        {
+                            "type": "if",
+                            "condition": "flag:mode==1",
+                            "true": [
+                                "请输入房间号（存在则加入，不存在则建房）。\n也可以直接点取消进入匹配模式。",
+                                {
+                                    "type": "input",
+                                    "text": "请输入房间号"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "function",
+                            "function": "function(){\ncore.connect()\n}"
                         },
                         {
                             "type": "setValue",
                             "name": "flag:waitTime",
-                            "value": "flag:waitTime+250"
+                            "value": "0"
+                        },
+                        {
+                            "type": "while",
+                            "condition": "true",
+                            "data": [
+                                {
+                                    "type": "autoText",
+                                    "text": "正在等待其他玩家加入，请稍后...  ${parseInt(flag:waitTime/1000)}s\n刷新界面以退出。\n（若长时间匹配不上可以尝试刷新重试）",
+                                    "time": 250
+                                },
+                                {
+                                    "type": "setValue",
+                                    "name": "flag:waitTime",
+                                    "value": "flag:waitTime+250"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "insert",
+                            "name": "主循环"
                         }
                     ]
-                },
-                {
-                    "type": "insert",
-                    "name": "主循环"
                 }
             ]
         }
