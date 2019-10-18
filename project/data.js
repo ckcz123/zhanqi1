@@ -5,11 +5,13 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"MT0",
 			"desert",
 			"cave",
-			"ice"
+			"ice",
+			"snowman"
 		],
 		"images": [
 			"bg.jpg",
-			"winskin.png"
+			"winskin.png",
+			"snowman.png"
 		],
 		"tilesets": [
 			"006-Desert01.png",
