@@ -1,328 +1,128 @@
 var events_c12a15a8_c380_4b28_8144_256cba95f760 = 
 {
 	"commonEvent": {
-		"加点事件": [
-			{
-				"type": "comment",
-				"text": "通过传参，flag:arg1表示当前应该的加点数值。"
-			},
-			{
-				"type": "choices",
-				"choices": [
-					{
-						"text": "攻击+${5*flag:arg1}",
-						"action": [
-							{
-								"type": "function",
-								"function": "function(){\nflags.obj.atk += 5*flags.arg1\n}"
-							}
-						]
-					},
-					{
-						"text": "防御+${2*flag:arg1}",
-						"action": [
-							{
-								"type": "function",
-								"function": "function(){\nflags.obj.def += 2*flags.arg1\n}"
-							}
-						]
-					},
-					{
-						"text": "生命+${35*flag:arg1}",
-						"action": [
-							{
-								"type": "function",
-								"function": "function(){\nflags.obj.hp = Math.min(flags.obj.hp + 35 * flags.arg1, flags.obj.hpmax);\n}"
-							}
-						]
-					}
-				]
-			}
-		],
-		"毒衰咒处理": [
-			{
-				"type": "comment",
-				"text": "获得毒衰咒效果，flag:arg1为要获得的类型"
-			},
-			{
-				"type": "switch",
-				"condition": "flag:arg1",
-				"caseList": [
-					{
-						"case": "0",
-						"action": [
-							{
-								"type": "comment",
-								"text": "获得毒效果"
-							},
-							{
-								"type": "if",
-								"condition": "!flag:poison",
-								"true": [
-									{
-										"type": "setValue",
-										"name": "flag:poison",
-										"value": "true"
-									}
-								],
-								"false": []
-							}
-						]
-					},
-					{
-						"case": "1",
-						"action": [
-							{
-								"type": "comment",
-								"text": "获得衰效果"
-							},
-							{
-								"type": "if",
-								"condition": "!flag:weak",
-								"true": [
-									{
-										"type": "setValue",
-										"name": "flag:weak",
-										"value": "true"
-									},
-									{
-										"type": "if",
-										"condition": "core.values.weakValue>=1",
-										"true": [
-											{
-												"type": "comment",
-												"text": ">=1：直接扣数值"
-											},
-											{
-												"type": "addValue",
-												"name": "status:atk",
-												"value": "-core.values.weakValue"
-											},
-											{
-												"type": "addValue",
-												"name": "status:def",
-												"value": "-core.values.weakValue"
-											}
-										],
-										"false": [
-											{
-												"type": "comment",
-												"text": "<1：扣比例"
-											},
-											{
-												"type": "function",
-												"function": "function(){\ncore.addBuff('atk', -core.values.weakValue);\n}"
-											},
-											{
-												"type": "function",
-												"function": "function(){\ncore.addBuff('def', -core.values.weakValue);\n}"
-											}
-										]
-									}
-								],
-								"false": []
-							}
-						]
-					},
-					{
-						"case": "2",
-						"action": [
-							{
-								"type": "comment",
-								"text": "获得咒效果"
-							},
-							{
-								"type": "if",
-								"condition": "!flag:curse",
-								"true": [
-									{
-										"type": "setValue",
-										"name": "flag:curse",
-										"value": "true"
-									}
-								],
-								"false": []
-							}
-						]
-					}
-				]
-			}
-		],
-		"滑冰事件": [
-			{
-				"type": "comment",
-				"text": "公共事件：滑冰事件"
-			},
+		"初始化": [
 			{
 				"type": "if",
-				"condition": "core.canMoveHero()",
+				"condition": "flag:mode==0",
 				"true": [
 					{
+						"type": "function",
+						"function": "function(){\ncore.initMonsters();\n}"
+					},
+					{
 						"type": "comment",
-						"text": "检测下一个点是否可通行"
+						"text": "flag:turn，flag:choose，flag:temp，flag:obj，flag:me"
 					},
 					{
-						"type": "setValue",
-						"name": "flag:nx",
-						"value": "core.nextX()"
+						"type": "insert",
+						"name": "主循环"
+					}
+				],
+				"false": [
+					{
+						"type": "if",
+						"condition": "flag:mode == 2",
+						"true": [
+							{
+								"type": "setValue",
+								"name": "flag:id",
+								"value": "core.getCookie(\"id\")"
+							},
+							{
+								"type": "setValue",
+								"name": "flag:password",
+								"value": "core.getCookie(\"password\")"
+							},
+							{
+								"type": "if",
+								"condition": "!flag:id || !flag:password",
+								"true": [
+									"只有登录的情况下才能参与竞技匹配！",
+									{
+										"type": "restart"
+									}
+								]
+							},
+							{
+								"type": "setGlobalFlag",
+								"name": "checkConsole",
+								"value": true
+							},
+							{
+								"type": "if",
+								"condition": "core.consoleOpened()",
+								"true": [
+									"竞技匹配下不可开启控制台！对局过程中一旦发现开启直接判负！\n请关闭控制台后重新进行匹配。",
+									{
+										"type": "restart"
+									}
+								]
+							}
+						]
 					},
 					{
-						"type": "setValue",
-						"name": "flag:ny",
-						"value": "core.nextY()"
+						"type": "function",
+						"function": "function(){\ncore.initSocket()\n}"
 					},
 					{
 						"type": "if",
-						"condition": "core.noPass(flag:nx, flag:ny)",
+						"condition": "flag:mode==-1",
 						"true": [
+							"请输入观战房间号，若不存在该房间则直接退出。",
 							{
-								"type": "comment",
-								"text": "不可通行，触发下一个点的事件"
+								"type": "input",
+								"text": "请输入观战房间号"
 							},
 							{
-								"type": "trigger",
-								"loc": [
-									"flag:nx",
-									"flag:ny"
-								]
+								"type": "function",
+								"function": "function(){\ncore.watch()\n}"
+							},
+							{
+								"type": "insert",
+								"name": "主循环"
 							}
 						],
 						"false": [
 							{
-								"type": "comment",
-								"text": "可通行，先移动到下个点，然后检查阻激夹域，并尝试触发该点事件"
-							},
-							{
-								"type": "moveHero",
-								"time": 80,
-								"steps": [
-									"forward"
+								"type": "if",
+								"condition": "flag:mode==1",
+								"true": [
+									"请输入房间号（存在则加入，不存在则建房）。\n也可以直接点取消进入匹配模式。",
+									{
+										"type": "input",
+										"text": "请输入房间号"
+									}
 								]
 							},
 							{
 								"type": "function",
-								"function": "function(){\ncore.checkBlock();\n}"
+								"function": "function(){\ncore.connect()\n}"
 							},
 							{
-								"type": "comment",
-								"text": "【触发事件】如果该点存在事件则会立刻结束当前事件"
+								"type": "setValue",
+								"name": "flag:waitTime",
+								"value": "0"
 							},
 							{
-								"type": "trigger",
-								"loc": [
-									"flag:nx",
-									"flag:ny"
-								]
-							},
-							{
-								"type": "comment",
-								"text": "如果该点不存在事件，则继续检测该点是否是滑冰点"
-							},
-							{
-								"type": "if",
-								"condition": "core.getBgNumber() == 167",
-								"true": [
+								"type": "while",
+								"condition": "true",
+								"data": [
 									{
-										"type": "function",
-										"function": "function(){\ncore.insertAction(\"滑冰事件\",null,null,null,true)\n}"
-									}
-								],
-								"false": []
-							}
-						]
-					}
-				],
-				"false": []
-			}
-		],
-		"回收钥匙商店": [
-			{
-				"type": "comment",
-				"text": "此事件在全局商店中被引用了(全局商店keyShop1)"
-			},
-			{
-				"type": "comment",
-				"text": "解除引用前勿删除此事件"
-			},
-			{
-				"type": "comment",
-				"text": "玩家在快捷列表（V键）中可以使用本公共事件"
-			},
-			{
-				"type": "while",
-				"condition": "1",
-				"data": [
-					{
-						"type": "choices",
-						"text": "\t[商人,woman]你有多余的钥匙想要出售吗？",
-						"choices": [
-							{
-								"text": "黄钥匙（10金币）",
-								"color": [
-									255,
-									255,
-									0,
-									1
-								],
-								"action": [
+										"type": "autoText",
+										"text": "正在等待其他玩家加入，请稍后...  ${parseInt(flag:waitTime/1000)}s\n刷新界面以退出。\n（若长时间匹配不上可以尝试刷新重试）",
+										"time": 250
+									},
 									{
-										"type": "if",
-										"condition": "item:yellowKey >= 1",
-										"true": [
-											{
-												"type": "addValue",
-												"name": "item:yellowKey",
-												"value": "-1"
-											},
-											{
-												"type": "addValue",
-												"name": "status:money",
-												"value": "10"
-											}
-										],
-										"false": [
-											"\t[商人,woman]你没有黄钥匙！"
-										]
+										"type": "setValue",
+										"name": "flag:waitTime",
+										"value": "flag:waitTime+250"
 									}
 								]
 							},
 							{
-								"text": "蓝钥匙（50金币）",
-								"color": [
-									0,
-									0,
-									255,
-									1
-								],
-								"action": [
-									{
-										"type": "if",
-										"condition": "item:blueKey >= 1",
-										"true": [
-											{
-												"type": "addValue",
-												"name": "item:blueKey",
-												"value": "-1"
-											},
-											{
-												"type": "addValue",
-												"name": "status:money",
-												"value": "50"
-											}
-										],
-										"false": [
-											"\t[商人,woman]你没有蓝钥匙！"
-										]
-									}
-								]
-							},
-							{
-								"text": "离开",
-								"action": [
-									{
-										"type": "exit"
-									}
-								]
+								"type": "insert",
+								"name": "主循环"
 							}
 						]
 					}
@@ -535,6 +335,44 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 										"type": "break"
 									}
 								]
+							}
+						]
+					}
+				]
+			}
+		],
+		"加点事件": [
+			{
+				"type": "comment",
+				"text": "通过传参，flag:arg1表示当前应该的加点数值。"
+			},
+			{
+				"type": "choices",
+				"choices": [
+					{
+						"text": "攻击+${5*flag:arg1}",
+						"action": [
+							{
+								"type": "function",
+								"function": "function(){\nflags.obj.atk += 5*flags.arg1\n}"
+							}
+						]
+					},
+					{
+						"text": "防御+${2*flag:arg1}",
+						"action": [
+							{
+								"type": "function",
+								"function": "function(){\nflags.obj.def += 2*flags.arg1\n}"
+							}
+						]
+					},
+					{
+						"text": "生命+${35*flag:arg1}",
+						"action": [
+							{
+								"type": "function",
+								"function": "function(){\nflags.obj.hp = Math.min(flags.obj.hp + 35 * flags.arg1, flags.obj.hpmax);\n}"
 							}
 						]
 					}

@@ -1,30 +1,35 @@
 main.floors.MT0=
 {
     "floorId": "MT0",
-    "title": "主塔 0 层",
+    "title": "绿影迷踪",
     "name": "0",
     "canFlyTo": true,
     "canUseQuickShop": true,
     "cannotViewMap": false,
-    "defaultGround": "ground",
+    "defaultGround": "grass",
     "images": [],
     "item_ratio": 1,
     "map": [
-    [  4,  4,  4,  4,  4,  4,  0,  4,  4,  4,  4,  4,  4],
-    [  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4],
-    [  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4],
-    [  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4],
-    [  4,  0, 31,  0,  0,  4,  0,  4,  0,  0, 31,  0,  4],
-    [  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4],
-    [ 32,  0,  0,  0,  4,  0,  0,  0,  4,  0,  0,  0, 32],
-    [  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4],
-    [  4,  0, 31,  0,  0,  4,  0,  4,  0,  0, 31,  0,  4],
-    [  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4],
-    [  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4],
-    [  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4],
-    [  4,  4,  4,  4,  4,  4,  0,  4,  4,  4,  4,  4,  4]
+    [ 20, 20, 20, 20, 20, 20,  0, 20, 20, 20, 20, 20, 20],
+    [ 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20],
+    [ 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20],
+    [ 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20],
+    [ 20,  0, 31,  0,  0,  1,  0,  1,  0,  0, 31,  0, 20],
+    [ 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20],
+    [ 32,  0,  0,  0,  1,  0,  0,  0,  1,  0,  0,  0, 32],
+    [ 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20],
+    [ 20,  0, 31,  0,  0,  1,  0,  1,  0,  0, 31,  0, 20],
+    [ 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20],
+    [ 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20],
+    [ 20,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20],
+    [ 20, 20, 20, 20, 20, 20,  0, 20, 20, 20, 20, 20, 20]
 ],
-    "firstArrive": [],
+    "firstArrive": [
+        {
+            "type": "insert",
+            "name": "初始化"
+        }
+    ],
     "parallelDo": "",
     "events": {},
     "changeFloor": {},
@@ -33,139 +38,25 @@ main.floors.MT0=
     "afterOpenDoor": {},
     "cannotMove": {},
     "bgmap": [
-
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,153,  0,153,  0,153,  0,  0,  0,  0],
+    [  0,  0,  0,153,  0,153,153,153,  0,153,  0,  0,  0],
+    [  0,  0,153,  0,153,  0,153,  0,153,  0,153,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,153,  0,153,  0,153,  0,153,  0,153,  0,  0],
+    [  0,  0,  0,153,  0,153,153,153,  0,153,  0,  0,  0],
+    [  0,  0,  0,  0,153,  0,153,  0,153,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0]
 ],
     "fgmap": [
 
 ],
     "width": 13,
     "height": 13,
-    "eachArrive": [
-        {
-            "type": "if",
-            "condition": "flag:mode==0",
-            "true": [
-                {
-                    "type": "function",
-                    "function": "function(){\ncore.initMonsters();\n}"
-                },
-                {
-                    "type": "comment",
-                    "text": "flag:turn，flag:choose，flag:temp，flag:obj，flag:me"
-                },
-                {
-                    "type": "insert",
-                    "name": "主循环"
-                }
-            ],
-            "false": [
-                {
-                    "type": "if",
-                    "condition": "flag:mode == 2",
-                    "true": [
-                        {
-                            "type": "setValue",
-                            "name": "flag:id",
-                            "value": "core.getCookie(\"id\")"
-                        },
-                        {
-                            "type": "setValue",
-                            "name": "flag:password",
-                            "value": "core.getCookie(\"password\")"
-                        },
-                        {
-                            "type": "if",
-                            "condition": "!flag:id || !flag:password",
-                            "true": [
-                                "只有登录的情况下才能参与竞技匹配！",
-                                {
-                                    "type": "restart"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "setGlobalFlag",
-                            "name": "checkConsole",
-                            "value": true
-                        },
-                        {
-                            "type": "if",
-                            "condition": "core.consoleOpened()",
-                            "true": [
-                                "竞技匹配下不可开启控制台！对局过程中一旦发现开启直接判负！\n请关闭控制台后重新进行匹配。",
-                                {
-                                    "type": "restart"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "type": "function",
-                    "function": "function(){\ncore.initSocket()\n}"
-                },
-                {
-                    "type": "if",
-                    "condition": "flag:mode==-1",
-                    "true": [
-                        "请输入观战房间号，若不存在该房间则直接退出。",
-                        {
-                            "type": "input",
-                            "text": "请输入观战房间号"
-                        },
-                        {
-                            "type": "function",
-                            "function": "function(){\ncore.watch()\n}"
-                        },
-                        {
-                            "type": "insert",
-                            "name": "主循环"
-                        }
-                    ],
-                    "false": [
-                        {
-                            "type": "if",
-                            "condition": "flag:mode==1",
-                            "true": [
-                                "请输入房间号（存在则加入，不存在则建房）。\n也可以直接点取消进入匹配模式。",
-                                {
-                                    "type": "input",
-                                    "text": "请输入房间号"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "function",
-                            "function": "function(){\ncore.connect()\n}"
-                        },
-                        {
-                            "type": "setValue",
-                            "name": "flag:waitTime",
-                            "value": "0"
-                        },
-                        {
-                            "type": "while",
-                            "condition": "true",
-                            "data": [
-                                {
-                                    "type": "autoText",
-                                    "text": "正在等待其他玩家加入，请稍后...  ${parseInt(flag:waitTime/1000)}s\n刷新界面以退出。\n（若长时间匹配不上可以尝试刷新重试）",
-                                    "time": 250
-                                },
-                                {
-                                    "type": "setValue",
-                                    "name": "flag:waitTime",
-                                    "value": "flag:waitTime+250"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "insert",
-                            "name": "主循环"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "eachArrive": [],
+    "bgm": "grass.mp3"
 }

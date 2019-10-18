@@ -2,20 +2,32 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 {
 	"main": {
 		"floorIds": [
-			"MT0"
+			"MT0",
+			"desert",
+			"cave",
+			"ice"
 		],
 		"images": [
 			"bg.jpg",
 			"winskin.png"
 		],
-		"tilesets": [],
+		"tilesets": [
+			"006-Desert01.png",
+			"044-Cave02.png",
+			"Map-Cave03.png",
+			"ice.png"
+		],
 		"animates": [
 			"hand",
 			"sword",
 			"zone"
 		],
 		"bgms": [
-			"bgm.mp3"
+			"bgm.mp3",
+			"desert.mp3",
+			"cave.mp3",
+			"grass.mp3",
+			"ice.mp3"
 		],
 		"sounds": [
 			"floor.mp3",
@@ -240,7 +252,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			}
 		],
 		"startText": [
-			"欢迎来到魔塔战棋。\n请仔细阅读评论区的置顶以了解基本规则，并尝试左右互搏以更深入的了解本塔。\n\n如有问题，欢迎加群讨论，小艾感谢大家的支持！\nHTML5魔塔交流群：\r[yellow]539113091\r\n魔塔战棋意见群：\r[yellow]853897239\r",
+			"欢迎来到魔塔战棋。\n请仔细阅读评论区的置顶以了解基本规则，并尝试左右互搏以更深入的了解本塔。\n\n如有问题，欢迎加群讨论，小艾感谢大家的支持！\nHTML5魔塔交流群：\r[yellow]539113091\r\n魔塔战棋意见群：\r[yellow]853897239\r"
 		],
 		"shops": [],
 		"levelUp": []

@@ -218,7 +218,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				var ny = y + core.utils.scan[direction].y;
 				if (nx < 0 || nx > 12 || ny < 0 || ny > 12) continue;
 				if (route[nx + "," + ny] != null) continue;
-				if (core.getBlockId(nx, ny) == 'star') continue;
+				var blockCls = core.getBlockCls(nx, ny);
+				if (blockCls == 'terrains' || blockCls == 'autotile' || blockCls == 'tileset') continue;
 				if (this.hasSelfMonster(nx, ny)) continue;
 				route[nx + "," + ny] = r.concat(direction);
 				if (core.noPass(nx, ny)) continue;
@@ -797,6 +798,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	//	观战模式
 	main.dom.loadGame.onclick = function() {
 		core.events.startGame("观战模式");
+	}
+
+	core.events._startGame_afterStart = function (nowLoc, callback) {
+		core.ui.closePanel();
+		this._startGame_statusBar();
+		core.dom.musicBtn.style.display = 'none';
+		var floorId = core.floorIds[parseInt(Math.random() * core.floorIds.length)];
+		core.changeFloor(floorId, null, nowLoc, null, function () {
+			// 插入一个空事件避免直接回放录像出错
+			core.insertAction([]);
+			if (callback) callback();
+		});
+		this._startGame_upload();
 	}
 
 },
