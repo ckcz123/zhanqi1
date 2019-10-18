@@ -1,7 +1,7 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
     "init": function () {
-	this.version = 18;
+	this.version = 20;
 
 	this.monsters = [{
 		hpmax: 50,
@@ -9,7 +9,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		atk: 10,
 		def: 3,
 		dis: 3,
-		point: 1
+		point: 1,
+		lv: 0
 	},
 	{
 		hpmax: 25,
@@ -17,7 +18,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		atk: 20,
 		def: 0,
 		dis: 4,
-		point: 1
+		point: 1,
+		lv: 0
 	},
 	{
 		hpmax: 60,
@@ -25,7 +27,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		atk: 11,
 		def: 4,
 		dis: 2,
-		point: 1
+		point: 1,
+		lv: 0
 	},
 	{
 		hpmax: 1,
@@ -36,7 +39,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		special: 1,
 		specialText: '自爆光环',
 		specialHint: '死亡时对方单位生命值变成1，且周围九宫格内对方单位生命值减半',
-		point: 0
+		point: 0,
+		lv: 0
 	},
 	{
 		hpmax: 1,
@@ -47,7 +51,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		special: 3,
 		specialText: '退化光环',
 		specialHint: '死亡时周围九宫格范围内对方单位攻防各降低20%',
-		point: 0
+		point: 0,
+		lv: 0
 	},
 	{
 		hpmax: 30,
@@ -58,7 +63,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		special: 2,
 		specialText: '鼓舞光环',
 		specialHint: '在此单位九宫格范围内的战斗，己方单位获得15点护盾',
-		point: 1
+		point: 1,
+		lv: 0
 	},
 	{
 		hpmax: 10,
@@ -69,7 +75,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		boss: true,
 		specialText: '王者',
 		specialHint: '此单位死亡则立即判负',
-		point: 0
+		point: 0,
+		lv: 0
 	}
 ];
 
@@ -509,7 +516,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 		core.plugin.players[0].concat(core.plugin.players[1]).forEach(function (one) {
 			if (core.plugin.isMoving && one == flags.obj) return;
-			core.fillBoldText('damage', one.hp, 32 * one.loc[0] + 1, 32 * (one.loc[1] + 1) - 1, '#FFFFFF');
+			var hp = one.hp;
+			for (var i = 0; i < one.lv; ++i) hp += "^";
+			core.fillBoldText('damage', hp, 32 * one.loc[0] + 1, 32 * (one.loc[1] + 1) - 1, '#FFFFFF');
 		})
 	}
 

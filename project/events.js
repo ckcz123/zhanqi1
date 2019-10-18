@@ -354,7 +354,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						"action": [
 							{
 								"type": "function",
-								"function": "function(){\nflags.obj.atk += 5*flags.arg1\n}"
+								"function": "function(){\nflags.obj.atk += 5*flags.arg1; obj.lv++;\n}"
 							}
 						]
 					},
@@ -363,7 +363,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						"action": [
 							{
 								"type": "function",
-								"function": "function(){\nflags.obj.def += 2*flags.arg1\n}"
+								"function": "function(){\nflags.obj.def += 2*flags.arg1; obj.lv++;\n}"
 							}
 						]
 					},
