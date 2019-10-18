@@ -155,6 +155,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	this.initMonsters = function () {
 		// 初始化地图并创建怪物
 		core.resetMap();
+		this.timelimitCount = 3;
 		core.createCanvas('color', 0, 0, 416, 416, 12);
 
 		for (var k = 0; k < 2; ++k) {
