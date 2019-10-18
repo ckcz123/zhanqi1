@@ -392,12 +392,22 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.statusBar.image.keyboard.style.opacity = 0;
 		core.statusBar.image.toolbox.style.opacity = 0;
 		core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
-		if (core.getFlag("mode", 0) != 0) {
+		if (core.getFlag("mode", 0) == -1) {
+			core.statusBar.image.save.style.opacity = 0;
+			core.statusBar.image.load.style.opacity = 0;
+			core.statusBar.image.fly.style.opacity = 1;
+			core.statusBar.image.settings.style.opacity = 1;
+		}
+		else if (core.getFlag("mode", 0) != 0) {
+			core.statusBar.image.save.style.opacity = 1;
+			core.statusBar.image.load.style.opacity = 1;
 			core.statusBar.image.save.src = core.statusBar.icons.btn7.src;
 			core.statusBar.image.load.src = core.statusBar.icons.btn8.src;
 			core.statusBar.image.fly.style.opacity = 1;
 			core.statusBar.image.settings.style.opacity = 0;
 		} else {
+			core.statusBar.image.save.style.opacity = 1;
+			core.statusBar.image.load.style.opacity = 1;
 			core.statusBar.image.save.src = core.statusBar.icons.save.src;
 			core.statusBar.image.load.src = core.statusBar.icons.load.src;
 			core.statusBar.image.fly.style.opacity = 0;
@@ -585,8 +595,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	core.statusBar.image.settings.onclick = function () {
-		if (!core.isInGame()) return;
-		if (flags.mode != 0) return;
+		if (!core.isInGame() || flags.mode > 0) return;
+		if (flags.mode == -1) {
+			core.insertAction({"type": "restart"});
+			return;
+		}
 		if (core.status.event.data.current.type != 'wait') return;
 		core.insertAction([{ "type": "confirm", "text": "返回标题界面？", "yes": [{ "type": "restart" }], "no": [] }, { "type": "wait" }]);
 		core.doAction();
